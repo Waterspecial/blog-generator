@@ -22,7 +22,7 @@ The seed dataset is `data/seed/fintech.csv` (top 100 UK seed-stage fintechs by t
 | Purpose | Tool |
 |---|---|
 | Framework | Nuxt (latest, v4) with SSR enabled (default) |
-| Styling | Tailwind CSS (`@nuxtjs/tailwindcss`) |
+| Styling | Tailwind CSS v4 (`@tailwindcss/vite`) + daisyUI 5 |
 | CSV parsing | Papa Parse (`papaparse`) on client and server |
 | Validation | Zod |
 | LLM | Google Gemini via `@google/genai` (free tier), with Ollama as an optional alternative |
