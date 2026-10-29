@@ -26,3 +26,6 @@ logs
 # Generated blogs
 data/blogs/*
 !data/blogs/.gitkeep
+
+# Local design mockups
+design/

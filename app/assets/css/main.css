@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: insights --default;
+}
+
+@plugin "daisyui/theme" {
+  name: "insights";
+  default: true;
+  color-scheme: light;
+  --color-base-100: #ffffff;
+  --color-base-200: #F5F7FA;
+  --color-base-300: #E2E8F0;
+  --color-base-content: #0B1F3A;
+  --color-primary: #1D4ED8;
+  --color-primary-content: #ffffff;
+  --color-secondary: #0B1F3A;
+  --color-secondary-content: #ffffff;
+  --color-accent: #93C5FD;
+  --color-accent-content: #0B1F3A;
+  --color-neutral: #0B1F3A;
+  --color-neutral-content: #DBEAFE;
+  --radius-box: 20px;
+  --radius-field: 999px;
+  --radius-selector: 999px;
+}
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --color-navy: #0B1F3A;
+  --color-navy-soft: #1E3A8A;
+  --color-navy-line: #3B5B8C;
+  --color-brand: #1D4ED8;
+  --color-brand-dark: #1E3A8A;
+  --color-brand-light: #93C5FD;
+  --color-brand-tint: #DBEAFE;
+  --color-brand-mist: #BFDBFE;
+  --color-page: #F5F7FA;
+
+  --radius-card: 20px;
+  --shadow-card: 0 1px 2px rgba(11, 31, 58, 0.06), 0 10px 28px rgba(11, 31, 58, 0.08);
+}
