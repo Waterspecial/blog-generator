@@ -30,7 +30,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     llmProvider: 'gemini', // 'gemini' | 'ollama' | 'none'
     geminiApiKey: '',
-    geminiModel: 'gemini-2.5-flash',
+    geminiModel: 'gemini-3.5-flash',
     ollamaUrl: 'http://localhost:11434',
     ollamaModel: 'llama3.1',
     public: {

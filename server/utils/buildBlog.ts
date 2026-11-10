@@ -4,7 +4,7 @@ import { detectFields, missingRequiredFields } from '../../shared/detectFields'
 import { STANDARD_FIELDS, type ColumnMapping } from '../../shared/fields'
 import { detectCurrency, invertMapping, normaliseRows, type RawRow } from '../../shared/normalise'
 import { BlogDocumentSchema, type BlogDocument } from '../../shared/schemas'
-import { fallbackCopy } from './fallbackCopy'
+import { generateCopy, type LlmConfig } from './llm'
 
 export interface BuildBlogInput {
   csv: string
@@ -28,7 +28,7 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, '') || 'blog'
 }
 
-export function buildBlogDocument(input: BuildBlogInput): BlogDocument {
+export async function buildBlogDocument(input: BuildBlogInput, llm: LlmConfig): Promise<BlogDocument> {
   const industry = input.industry.trim()
   const { headers, rows: rawRows } = parseCsv(input.csv)
   const mapping = input.mapping ?? detectFields(headers, rawRows.slice(0, 5))
@@ -50,6 +50,8 @@ export function buildBlogDocument(input: BuildBlogInput): BlogDocument {
     })
   })
 
+  const copy = await generateCopy({ industry, amountLabel, currency, stats, rows }, llm)
+
   return BlogDocumentSchema.parse({
     slug: input.slug ?? slugify(industry),
     industry,
@@ -60,8 +62,8 @@ export function buildBlogDocument(input: BuildBlogInput): BlogDocument {
     amountLabel,
     currency,
     stats,
-    content: fallbackCopy({ industry, amountLabel, currency, stats, rows }),
-    contentSource: 'fallback',
+    content: copy.content,
+    contentSource: copy.source,
     rows,
   })
 }
