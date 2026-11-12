@@ -2,31 +2,37 @@
 const { data: blogs } = await useFetch('/api/blogs')
 const config = useRuntimeConfig()
 
+const title = `Blog | ${config.public.siteName}`
+const description = 'Data-driven rankings of UK companies by industry, built from real datasets.'
+const pageUrl = `${config.public.siteUrl.replace(/\/$/, '')}/blog`
+
 useSeoMeta({
-  title: `Blog | ${config.public.siteName}`,
-  description: 'Data-driven rankings of UK companies by industry, built from real datasets.',
+  title,
+  description,
+  ogTitle: title,
+  ogDescription: description,
   ogType: 'website',
+  ogUrl: pageUrl,
 })
 
 useHead({
-  link: [{ rel: 'canonical', href: `${config.public.siteUrl.replace(/\/$/, '')}/blog` }],
+  link: [{ rel: 'canonical', href: pageUrl }],
 })
 </script>
 
 <template>
-  <main class="mx-auto max-w-3xl px-4 py-8">
-    <h1 class="text-3xl font-bold">Industry rankings</h1>
-    <p class="mt-2 text-slate-600">Data-driven rankings of UK companies by industry.</p>
+  <main>
+    <PageHero title="Industry rankings" :crumbs="[{ label: 'Home', to: '/' }, { label: 'Blog' }]" overlap>
+      <p class="max-w-190 text-base text-brand-tint sm:text-lg">Data-driven rankings of UK companies by industry.</p>
+    </PageHero>
 
-    <ul v-if="blogs?.length" class="mt-8 space-y-6">
-      <li v-for="blog in blogs" :key="blog.slug" class="rounded-lg border border-slate-200 p-5">
-        <p class="text-sm font-medium text-blue-700">{{ blog.industry }}</p>
-        <h2 class="mt-1 text-xl font-semibold">
-          <NuxtLink :to="`/blog/${blog.slug}`" class="hover:underline">{{ blog.title }}</NuxtLink>
-        </h2>
-        <p class="mt-2 text-slate-600">{{ blog.metaDescription }}</p>
-      </li>
-    </ul>
-    <p v-else class="mt-8 text-slate-600">No blogs yet. Run <code>npm run seed</code> to create the first one.</p>
+    <div class="mx-auto -mt-19 max-w-290 px-6 pb-16">
+      <ul v-if="blogs?.length" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <li v-for="blog in blogs" :key="blog.slug">
+          <BlogSummaryCard :blog="blog" />
+        </li>
+      </ul>
+      <p v-else class="rounded-card bg-white p-6 text-slate-600 shadow-card">No blogs yet. Run <code>npm run seed</code> to create the first one.</p>
+    </div>
   </main>
 </template>

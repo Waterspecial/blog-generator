@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { detectFields, missingRequiredFields } from '../shared/detectFields'
+import { detectFields, missingRequiredFields } from '../shared/dataset/detectFields'
 
 describe('detectFields', () => {
   it('maps the fintech headers by name', () => {

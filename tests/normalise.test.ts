@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import Papa from 'papaparse'
 import { describe, expect, it } from 'vitest'
-import type { ColumnMapping } from '../shared/fields'
+import type { ColumnMapping } from '../shared/types'
 import {
   detectCurrency,
   normaliseRows,
@@ -12,7 +12,7 @@ import {
   parseYear,
   sizeSortKey,
   type RawRow,
-} from '../shared/normalise'
+} from '../shared/dataset/normalise'
 
 const fintechMapping: ColumnMapping = {
   'Rank': 'rank',

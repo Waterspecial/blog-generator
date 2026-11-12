@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { buildBlogDocument } from '../server/utils/buildBlog'
+import { buildBlogDocument } from '../server/services/buildBlog'
 
 if (existsSync('.env')) process.loadEnvFile('.env')
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BlogSummary } from '~~/server/utils/blogStore'
+import type { BlogSummary } from '#shared/types'
 
 const props = defineProps<{ currentSlug: string }>()
 

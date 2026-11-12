@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Stats } from '#shared/computeStats'
-import { formatPercent } from '#shared/format'
+import type { Stats } from '#shared/types'
+import { formatPercent } from '#shared/utils/format'
 
 const props = defineProps<{ location: NonNullable<Stats['location']>, companyCount: number }>()
 

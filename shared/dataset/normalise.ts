@@ -1,21 +1,4 @@
-import type { ColumnMapping, StandardField } from './fields'
-
-export type Currency = 'GBP' | 'USD' | 'EUR'
-
-export interface NormalisedRow {
-  rank: number
-  name: string
-  amount: number
-  location: string | null
-  size: string | null
-  stage: string | null
-  founded: number | null
-  tags: string[]
-  description: string | null
-  website: string | null
-}
-
-export type RawRow = Record<string, string | undefined>
+import type { ColumnMapping, Currency, NormalisedRow, RawRow, StandardField } from '../types'
 
 const EMPTY_VALUES = new Set(['', 'n/a', 'na', '-', '—', 'null', 'none', 'unknown'])
 

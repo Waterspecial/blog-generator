@@ -1,16 +1,10 @@
 import { GoogleGenAI } from '@google/genai'
 import { z } from 'zod'
+import { LLM_TIMEOUT_MS } from '../../shared/constants'
 import { BlogContentSchema, type BlogContent } from '../../shared/schemas'
-import { fallbackCopy, type CopyInput } from './fallbackCopy'
+import type { CopyInput, LlmConfig } from '../types'
+import { fallbackCopy } from './fallbackCopy'
 import { buildPrompt } from './prompt'
-
-export interface LlmConfig {
-  llmProvider: string
-  geminiApiKey: string
-  geminiModel: string
-  ollamaUrl: string
-  ollamaModel: string
-}
 
 const jsonSchema = z.toJSONSchema(BlogContentSchema)
 
@@ -19,7 +13,7 @@ async function callGemini(prompt: string, config: LlmConfig): Promise<string> {
   const response = await ai.models.generateContent({
     model: config.geminiModel,
     contents: prompt,
-    config: { responseMimeType: 'application/json', responseJsonSchema: jsonSchema, abortSignal: AbortSignal.timeout(60_000) },
+    config: { responseMimeType: 'application/json', responseJsonSchema: jsonSchema, abortSignal: AbortSignal.timeout(LLM_TIMEOUT_MS) },
   })
   return response.text ?? ''
 }
@@ -29,7 +23,7 @@ async function callOllama(prompt: string, config: LlmConfig): Promise<string> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model: config.ollamaModel, messages: [{ role: 'user', content: prompt }], format: jsonSchema, stream: false }),
-    signal: AbortSignal.timeout(60_000),
+    signal: AbortSignal.timeout(LLM_TIMEOUT_MS),
   })
   if (!response.ok) throw new Error(`Ollama returned ${response.status}`)
   const data = await response.json() as { message: { content: string } }

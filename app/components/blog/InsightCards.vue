@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Stats } from '#shared/computeStats'
-import { formatPercent } from '#shared/format'
+import type { Stats } from '#shared/types'
+import { formatPercent } from '#shared/utils/format'
 import type { BlogContent } from '#shared/schemas'
 
 const props = defineProps<{ sections: BlogContent['sections'], stats: Stats }>()

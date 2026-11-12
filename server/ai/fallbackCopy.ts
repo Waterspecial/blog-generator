@@ -1,15 +1,7 @@
-import type { Stats } from '../../shared/computeStats'
-import { formatCurrency, formatPercent } from '../../shared/format'
-import type { Currency, NormalisedRow } from '../../shared/normalise'
+import { formatCurrency, formatPercent } from '../../shared/utils/format'
+import type { Stats } from '../../shared/types'
 import type { BlogContent } from '../../shared/schemas'
-
-export interface CopyInput {
-  industry: string
-  amountLabel: string
-  currency: Currency | null
-  stats: Stats
-  rows: NormalisedRow[]
-}
+import type { CopyInput } from '../types'
 
 type Section = BlogContent['sections'][number]
 type Faq = BlogContent['faqs'][number]

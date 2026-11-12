@@ -1,4 +1,4 @@
-import type { CopyInput } from './fallbackCopy'
+import type { CopyInput } from '../types'
 
 export function buildPrompt(input: CopyInput): string {
   const { industry, amountLabel, currency, stats, rows } = input

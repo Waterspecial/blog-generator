@@ -1,27 +1,6 @@
-export const STANDARD_FIELDS = [
-  'name',
-  'amount',
-  'rank',
-  'location',
-  'size',
-  'stage',
-  'founded',
-  'tags',
-  'description',
-  'website',
-] as const
-
-export type StandardField = (typeof STANDARD_FIELDS)[number]
-
-export type ColumnMapping = Record<string, StandardField>
+import type { FieldDefinition, StandardField } from './types'
 
 export const REQUIRED_FIELDS: StandardField[] = ['name', 'amount']
-
-export interface FieldDefinition {
-  label: string
-  required: boolean
-  synonyms: string[]
-}
 
 export const FIELD_DEFINITIONS: Record<StandardField, FieldDefinition> = {
   name: {

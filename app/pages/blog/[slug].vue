@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BlogDocument } from '#shared/schemas'
+import { buildBlogJsonLd } from '#shared/seo/blogJsonLd'
 
 const route = useRoute()
 const slug = String(route.params.slug)
@@ -29,59 +30,12 @@ useSeoMeta({
   twitterCard: 'summary',
   twitterTitle: content.title,
   twitterDescription: content.metaDescription,
-  keywords: content.keywords.join(', '),
 })
-
-const organisation = { '@type': 'Organization', 'name': siteName, 'url': siteUrl }
-const jsonLd = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    'headline': content.title,
-    'description': content.metaDescription,
-    'datePublished': blog.createdAt,
-    'dateModified': blog.createdAt,
-    'author': organisation,
-    'publisher': organisation,
-    'mainEntityOfPage': pageUrl,
-    'keywords': content.keywords.join(', '),
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    'name': content.h1,
-    'numberOfItems': blog.rows.length,
-    'itemListElement': blog.rows.map(row => ({
-      '@type': 'ListItem',
-      'position': row.rank,
-      'name': row.name,
-      ...(row.website ? { url: row.website } : {}),
-    })),
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    'mainEntity': content.faqs.map(faq => ({
-      '@type': 'Question',
-      'name': faq.question,
-      'acceptedAnswer': { '@type': 'Answer', 'text': faq.answer },
-    })),
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    'itemListElement': [
-      { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': `${siteUrl}/` },
-      { '@type': 'ListItem', 'position': 2, 'name': 'Blog', 'item': `${siteUrl}/blog` },
-      { '@type': 'ListItem', 'position': 3, 'name': content.title, 'item': pageUrl },
-    ],
-  },
-]
 
 useHead({
   htmlAttrs: { lang: 'en-GB' },
   link: [{ rel: 'canonical', href: pageUrl }],
-  script: jsonLd.map(item => ({
+  script: buildBlogJsonLd(blog, { name: siteName, url: siteUrl }, pageUrl).map(item => ({
     type: 'application/ld+json',
     innerHTML: JSON.stringify(item).replace(/</g, '\\u003c'),
   })),

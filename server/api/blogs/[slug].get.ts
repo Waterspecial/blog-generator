@@ -1,3 +1,5 @@
+import { getBlog } from '../../services/blogStore'
+
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug') ?? ''
   const blog = await getBlog(slug)

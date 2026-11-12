@@ -1,5 +1,7 @@
 import { z } from 'zod'
-import { STANDARD_FIELDS } from '#shared/fields'
+import { MAX_UPLOAD_BYTES, STANDARD_FIELDS } from '#shared/constants'
+import { blogExists, saveBlog } from '../services/blogStore'
+import { buildBlogDocument, slugify } from '../services/buildBlog'
 
 const MappingSchema = z.record(z.string(), z.enum(STANDARD_FIELDS))
 
@@ -17,7 +19,7 @@ export default defineEventHandler(async (event) => {
   const mapping = MappingSchema.safeParse(parseJson(part('mapping')?.data.toString() ?? ''))
 
   if (!file?.filename?.toLowerCase().endsWith('.csv')) throw createError({ statusCode: 400, statusMessage: 'Please upload a .csv file' })
-  if (file.data.length > 2 * 1024 * 1024) throw createError({ statusCode: 400, statusMessage: 'The file must be under 2 MB' })
+  if (file.data.length > MAX_UPLOAD_BYTES) throw createError({ statusCode: 400, statusMessage: `The file must be under ${MAX_UPLOAD_BYTES / 1024 / 1024} MB` })
   if (!industry) throw createError({ statusCode: 400, statusMessage: 'Please enter an industry name' })
   if (!mapping.success) throw createError({ statusCode: 400, statusMessage: 'The column mapping is invalid' })
 

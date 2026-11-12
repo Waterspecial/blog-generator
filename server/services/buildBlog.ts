@@ -1,18 +1,12 @@
 import Papa from 'papaparse'
-import { computeStats } from '../../shared/computeStats'
-import { detectFields, missingRequiredFields } from '../../shared/detectFields'
-import { STANDARD_FIELDS, type ColumnMapping } from '../../shared/fields'
-import { detectCurrency, invertMapping, normaliseRows, type RawRow } from '../../shared/normalise'
+import { computeStats } from '../../shared/dataset/computeStats'
+import { detectFields, missingRequiredFields } from '../../shared/dataset/detectFields'
+import { STANDARD_FIELDS } from '../../shared/constants'
+import { detectCurrency, invertMapping, normaliseRows } from '../../shared/dataset/normalise'
+import type { RawRow } from '../../shared/types'
 import { BlogDocumentSchema, type BlogDocument } from '../../shared/schemas'
-import { generateCopy, type LlmConfig } from './llm'
-
-export interface BuildBlogInput {
-  csv: string
-  fileName: string
-  industry: string
-  slug?: string
-  mapping?: ColumnMapping
-}
+import type { BuildBlogInput, LlmConfig } from '../types'
+import { generateCopy } from '../ai/llm'
 
 export function parseCsv(csv: string): { headers: string[], rows: RawRow[] } {
   const result = Papa.parse<RawRow>(csv, { header: true, skipEmptyLines: true })

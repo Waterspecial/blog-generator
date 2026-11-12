@@ -1,7 +1,6 @@
 import { z } from 'zod'
-import { STANDARD_FIELDS } from './fields'
-import type { Stats } from './computeStats'
-import type { NormalisedRow } from './normalise'
+import { STANDARD_FIELDS } from './constants'
+import type { NormalisedRow, Stats } from './types'
 
 export const STAT_KEYS = ['amount', 'location', 'size', 'stage', 'founded', 'tags'] as const
 

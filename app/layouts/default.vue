@@ -3,7 +3,7 @@ const { siteName } = useRuntimeConfig().public
 </script>
 
 <template>
-  <div class="min-h-screen bg-page font-sans leading-relaxed text-navy">
+  <div class="flex min-h-screen flex-col bg-page font-sans leading-relaxed text-navy">
     <header class="bg-navy text-white">
       <nav aria-label="Main" class="mx-auto flex max-w-[1160px] flex-wrap items-center justify-between gap-4 px-6 py-4">
         <NuxtLink to="/" class="inline-flex items-center gap-2.5 text-xl font-extrabold text-white">
@@ -18,7 +18,9 @@ const { siteName } = useRuntimeConfig().public
       </nav>
     </header>
 
-    <slot />
+    <div class="flex-1">
+      <slot />
+    </div>
 
     <footer class="bg-navy text-brand-tint">
       <div class="mx-auto max-w-[1160px] px-6 py-8 text-sm">

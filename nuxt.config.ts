@@ -1,11 +1,10 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  modules: ['@nuxtjs/sitemap', '@nuxt/icon'],
+  modules: ['@nuxtjs/sitemap', '@nuxtjs/robots', '@nuxt/icon'],
 
   css: ['~/assets/css/main.css'],
 
@@ -26,6 +25,8 @@ export default defineNuxtConfig({
     url: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     name: process.env.NUXT_PUBLIC_SITE_NAME || 'Industry Rankings',
   },
+
+  sitemap: { sources: ['/api/__sitemap__/urls'], exclude: ['/'] },
 
   runtimeConfig: {
     llmProvider: 'gemini', // 'gemini' | 'ollama' | 'none'

@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { StandardField } from '#shared/fields'
-import { formatCurrency } from '#shared/format'
-import type { Currency, NormalisedRow } from '#shared/normalise'
+import { formatCurrency } from '#shared/utils/format'
+import type { Currency, NormalisedRow, StandardField } from '#shared/types'
 
 const props = defineProps<{
   rows: NormalisedRow[]

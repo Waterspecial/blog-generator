@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { Stats } from '#shared/computeStats'
-import { formatCurrency, formatPercent } from '#shared/format'
-import type { Currency } from '#shared/normalise'
+import { formatCurrency, formatPercent } from '#shared/utils/format'
+import type { Currency, Stats } from '#shared/types'
 
 const props = defineProps<{ stats: Stats, currency: Currency | null, amountLabel: string, year: number }>()
 

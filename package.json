@@ -15,6 +15,7 @@
   "dependencies": {
     "@google/genai": "^2.31.0",
     "@nuxt/icon": "^2.6.2",
+    "@nuxtjs/robots": "^7.0.2",
     "@nuxtjs/sitemap": "^9.1.0",
     "nuxt": "^4.6.3",
     "papaparse": "^5.7.0",

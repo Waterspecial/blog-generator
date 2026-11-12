@@ -1,14 +1,6 @@
 import { BlogDocumentSchema, type BlogDocument } from '#shared/schemas'
-
-export interface BlogSummary {
-  slug: string
-  industry: string
-  title: string
-  metaDescription: string
-  createdAt: string
-}
-
-const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/
+import { SLUG_PATTERN } from '#shared/constants'
+import type { BlogSummary } from '#shared/types'
 
 function storage() {
   return useStorage('blogs')
@@ -45,6 +37,11 @@ export async function listBlogs(): Promise<BlogSummary[]> {
       title: blog.content.title,
       metaDescription: blog.content.metaDescription,
       createdAt: blog.createdAt,
+      companyCount: blog.stats.companyCount,
+      amountTotal: blog.stats.amount.total,
+      amountLabel: blog.amountLabel,
+      currency: blog.currency,
+      topCompany: [...blog.rows].sort((a, b) => a.rank - b.rank)[0]?.name ?? '',
     }))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
