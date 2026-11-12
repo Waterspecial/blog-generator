@@ -1,5 +1,14 @@
+<script setup lang="ts">
+const { siteName } = useRuntimeConfig().public
+
+useSeoMeta({
+  ogSiteName: siteName,
+  ogLocale: 'en_GB',
+})
+</script>
+
 <template>
-  <div class="min-h-screen bg-white text-slate-900">
+  <NuxtLayout>
     <NuxtPage />
-  </div>
+  </NuxtLayout>
 </template>

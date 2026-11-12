@@ -1,4 +1,4 @@
-import type { Currency } from './normalise'
+import type { Currency } from '../types'
 
 const SYMBOLS: Record<Currency, string> = { GBP: '£', USD: '$', EUR: '€' }
 
@@ -17,4 +17,12 @@ export function formatCurrency(value: number, currency: Currency | null): string
 
 export function formatPercent(share: number): string {
   return `${Math.round(share * 100)}%`
+}
+
+const FILE_NAME_NOISE = /\b(top|\d+|uk|companies|company|startups?|seed|series [a-z]|stage|list|ranking|dataset|data|final|copy)\b/gi
+
+export function industryFromFileName(fileName: string): string {
+  const base = fileName.replace(/\.csv$/i, '').replace(/[-_]+/g, ' ')
+  const cleaned = base.replace(FILE_NAME_NOISE, ' ').replace(/\s+/g, ' ').trim()
+  return (cleaned || base).replace(/\b\w/g, c => c.toUpperCase())
 }

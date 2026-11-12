@@ -1,29 +1,6 @@
-import { sizeSortKey, type NormalisedRow } from './normalise'
-
-export type Count = [string, number]
-
-export interface NamedValue {
-  name: string
-  value: number
-}
-
-export interface Stats {
-  companyCount: number
-  context: { location?: string, size?: string, stage?: string }
-  amount: {
-    total: number
-    median: number
-    mean: number
-    min: NamedValue
-    max: NamedValue
-    top10Share: number
-  }
-  location?: { counts: Count[], topName: string, topShare: number, outsideTopCount: number }
-  size?: { distribution: Count[], mostCommon: string, mostCommonShare: number }
-  stage?: { counts: Count[] }
-  founded?: { medianYear: number, oldest: NamedValue, newest: NamedValue, byDecade: Count[] }
-  tags?: { top: Count[] }
-}
+import { TAG_EXCLUDE_SHARE, TOP_TAG_LIMIT } from '../constants'
+import { sizeSortKey } from './normalise'
+import type { Count, NamedValue, NormalisedRow, Stats } from '../types'
 
 function median(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b)
@@ -95,9 +72,6 @@ function foundedStats(rows: NormalisedRow[]): Stats['founded'] {
     byDecade: decades.sort((a, b) => a[0].localeCompare(b[0])),
   }
 }
-
-const TAG_EXCLUDE_SHARE = 0.9
-const TOP_TAG_LIMIT = 8
 
 function tagStats(rows: NormalisedRow[]): Stats['tags'] {
   const counts = countBy(rows.flatMap(row => [...new Set(row.tags)]))
