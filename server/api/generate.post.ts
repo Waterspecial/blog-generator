@@ -11,12 +11,14 @@ function parseJson(text: string): unknown {
 }
 
 export default defineEventHandler(async (event) => {
+  checkUploadToken(event)
   const form = await readMultipartFormData(event)
   const part = (name: string) => form?.find(item => item.name === name)
 
   const file = part('file')
   const industry = part('industry')?.data.toString().trim()
-  const mapping = MappingSchema.safeParse(parseJson(part('mapping')?.data.toString() ?? ''))
+  const mappingText = part('mapping')?.data.toString()
+  const mapping = MappingSchema.optional().safeParse(mappingText === undefined ? undefined : parseJson(mappingText))
 
   if (!file?.filename?.toLowerCase().endsWith('.csv')) throw createError({ statusCode: 400, statusMessage: 'Please upload a .csv file' })
   if (file.data.length > MAX_UPLOAD_BYTES) throw createError({ statusCode: 400, statusMessage: `The file must be under ${MAX_UPLOAD_BYTES / 1024 / 1024} MB` })

@@ -23,7 +23,7 @@ function headline(key: BlogContent['sections'][number]['statKey']): string | nul
 </script>
 
 <template>
-  <section aria-labelledby="insight" class="mb-14 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
+  <section aria-labelledby="insight" class="mb-14 grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-5">
     <h2 id="insight" class="col-span-full text-[28px] font-extrabold">What the data tells us</h2>
     <div v-for="section in sections" :key="section.heading" class="rounded-card border border-slate-200 bg-white p-6">
       <p v-if="headline(section.statKey)" class="mb-1.5 font-mono text-2xl text-brand">{{ headline(section.statKey) }}</p>
