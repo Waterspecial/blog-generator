@@ -20,6 +20,17 @@ const industry = ref('')
 const generating = ref(false)
 const error = ref('')
 const fallbackUrl = ref('')
+const uploadToken = ref('')
+
+const TOKEN_KEY = 'upload-token'
+onMounted(() => {
+  try { uploadToken.value = localStorage.getItem(TOKEN_KEY) ?? '' }
+  catch {}
+})
+watch(uploadToken, (value) => {
+  try { localStorage.setItem(TOKEN_KEY, value) }
+  catch {}
+})
 
 const canGenerate = computed(() => file.value && columns.value.name && columns.value.amount && industry.value.trim())
 
@@ -54,7 +65,11 @@ async function generate() {
   generating.value = true
   error.value = ''
   try {
-    const result = await $fetch<{ url: string, contentSource: string }>('/api/generate', { method: 'POST', body })
+    const result = await $fetch<{ url: string, contentSource: string }>('/api/generate', {
+      method: 'POST',
+      body,
+      headers: { 'x-upload-token': uploadToken.value },
+    })
     if (result.contentSource === 'fallback') fallbackUrl.value = result.url
     else await navigateTo(result.url)
   }
@@ -113,6 +128,11 @@ async function generate() {
         <h2 id="gen" class="mb-1 text-xl font-extrabold">3. Generate</h2>
         <p class="mb-5 text-sm text-slate-600">Stats are calculated from the CSV first, then the AI writes the copy.
           This takes about 30 seconds.</p>
+        <label class="mb-5 flex flex-col gap-1 text-sm font-semibold">
+          Upload token
+          <input v-model="uploadToken" type="password" autocomplete="current-password" class="input w-full bg-white font-normal sm:max-w-sm">
+          <span class="font-normal text-slate-600">Ask the site owner for this. It's remembered on this browser.</span>
+        </label>
         <button type="button" class="btn btn-primary btn-lg" :disabled="!canGenerate || generating" @click="generate">
           <span v-if="generating" class="loading loading-spinner" />
           {{ generating ? 'Generating copy with AI…' : 'Generate blog page' }}

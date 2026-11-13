@@ -10,13 +10,15 @@
     "postinstall": "nuxt prepare",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "push-blogs": "tsx scripts/push-blogs.ts"
   },
   "dependencies": {
     "@google/genai": "^2.31.0",
     "@nuxt/icon": "^2.6.2",
     "@nuxtjs/robots": "^7.0.2",
     "@nuxtjs/sitemap": "^9.1.0",
+    "@upstash/redis": "^1.41.0",
     "nuxt": "^4.6.3",
     "papaparse": "^5.7.0",
     "vue": "^3.5.44",
@@ -31,6 +33,7 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
+    "unstorage": "^1.17.6",
     "vitest": "^5.0.5"
   }
 }

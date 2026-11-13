@@ -31,6 +31,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     llmProvider: 'gemini', // 'gemini' | 'ollama' | 'none'
     geminiApiKey: '',
+    uploadToken: '',
     geminiModel: 'gemini-3.5-flash',
     ollamaUrl: 'http://localhost:11434',
     ollamaModel: 'llama3.1',
@@ -42,6 +43,9 @@ export default defineNuxtConfig({
 
   nitro: {
     storage: {
+      blogs: { driver: 'upstash', base: 'blogs' },
+    },
+    devStorage: {
       blogs: { driver: 'fs', base: './data/blogs' },
     },
   },

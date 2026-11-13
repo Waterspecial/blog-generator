@@ -51,32 +51,24 @@ const results = computed(() => {
   return list
 })
 
-const pageSize = 10
+const pageSizes = [10, 20, 50]
+const pageSize = ref(10)
 const page = ref(1)
 const sectionEl = ref<HTMLElement | null>(null)
 
-const pageCount = computed(() => Math.max(1, Math.ceil(results.value.length / pageSize)))
-const start = computed(() => (page.value - 1) * pageSize)
-
-const pages = computed(() => {
-  const list: (number | null)[] = []
-  for (let p = 1; p <= pageCount.value; p++) {
-    if (p === 1 || p === pageCount.value || Math.abs(p - page.value) <= 1) list.push(p)
-    else if (list.at(-1) !== null) list.push(null)
-  }
-  return list
-})
+const pageCount = computed(() => Math.max(1, Math.ceil(results.value.length / pageSize.value)))
+const start = computed(() => (page.value - 1) * pageSize.value)
 
 function goTo(target: number) {
   page.value = Math.min(Math.max(1, target), pageCount.value)
-  sectionEl.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  // sectionEl.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-watch([query, location, sort], () => { page.value = 1 })
+watch([query, location, sort, pageSize], () => { page.value = 1 })
 </script>
 
 <template>
-  <section ref="sectionEl" aria-labelledby="ranking" class="mb-14 rounded-card border border-slate-200 bg-white p-7">
+  <section ref="sectionEl" aria-labelledby="ranking" class="mb-14 rounded-card border border-slate-200 bg-white p-5 sm:p-7">
     <h2 id="ranking" class="mb-1 text-[28px] font-extrabold">The full top {{ rows.length }}</h2>
     <p class="mb-[18px] text-[15px] text-slate-600">{{ intro }}</p>
 
@@ -110,7 +102,7 @@ watch([query, location, sort], () => { page.value = 1 })
       </label>
     </div>
 
-    <div class="">
+    <div class="-mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0">
       <table class="table min-w-[720px] text-[15px]">
         <caption class="sr-only">{{ caption }}</caption>
         <thead>
@@ -160,30 +152,24 @@ watch([query, location, sort], () => { page.value = 1 })
       <p v-if="!results.length" class="py-8 text-center text-slate-600">No companies match your search.</p>
     </div>
 
-    <div v-if="results.length" class="mt-6 flex flex-col items-center gap-3">
-      <nav v-if="pageCount > 1" aria-label="Ranking pages" class="join">
-        <button type="button" class="join-item btn" :disabled="page === 1" @click="goTo(page - 1)">
-          <Icon name="lucide:chevron-left" class="size-4" />
-          <span class="hidden sm:inline">Previous</span>
-        </button>
-        <template v-for="(p, i) in pages" :key="p ?? `gap-${i}`">
-          <span v-if="p === null" class="join-item btn btn-disabled" aria-hidden="true">…</span>
-          <button
-            v-else
-            type="button"
-            class="join-item btn"
-            :class="{ 'btn-primary': p === page }"
-            :aria-label="`Page ${p}`"
-            :aria-current="p === page ? 'page' : undefined"
-            @click="goTo(p)"
-          >{{ p }}</button>
-        </template>
-        <button type="button" class="join-item btn" :disabled="page === pageCount" @click="goTo(page + 1)">
-          <span class="hidden sm:inline">Next</span>
-          <Icon name="lucide:chevron-right" class="size-4" />
-        </button>
-      </nav>
-      <p class="text-sm text-slate-600">Showing {{ start + 1 }} to {{ Math.min(start + pageSize, results.length) }} of {{ results.length }}</p>
+    <div v-if="results.length" class="mt-6 flex flex-wrap items-center justify-end gap-x-6 gap-y-3 text-sm text-slate-600">
+      <label class="flex items-center gap-2">
+        Rows per page
+        <select v-model.number="pageSize" class="select select-sm w-auto bg-white text-navy">
+          <option v-for="size in pageSizes" :key="size" :value="size">{{ size }}</option>
+        </select>
+      </label>
+      <div class="flex items-center gap-4">
+        <p aria-live="polite" class="tabular-nums">{{ start + 1 }}–{{ Math.min(start + pageSize, results.length) }} of {{ results.length }}</p>
+        <nav aria-label="Ranking pages" class="flex gap-1">
+          <button type="button" class="btn btn-circle btn-ghost" aria-label="Previous page" :disabled="page === 1" @click="goTo(page - 1)">
+            <Icon name="lucide:chevron-left" class="size-5" />
+          </button>
+          <button type="button" class="btn btn-circle btn-ghost" aria-label="Next page" :disabled="page === pageCount" @click="goTo(page + 1)">
+            <Icon name="lucide:chevron-right" class="size-5" />
+          </button>
+        </nav>
+      </div>
     </div>
   </section>
 </template>
