@@ -11,4 +11,5 @@ useSeoMeta({
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <AppToasts />
 </template>

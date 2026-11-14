@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { MAX_UPLOAD_BYTES, STANDARD_FIELDS } from '#shared/constants'
 import { blogExists, saveBlog } from '../services/blogStore'
-import { buildBlogDocument, slugify } from '../services/buildBlog'
+import { buildBlogDocument, CsvError, slugify } from '../services/buildBlog'
 
 const MappingSchema = z.record(z.string(), z.enum(STANDARD_FIELDS))
 
@@ -25,18 +25,20 @@ export default defineEventHandler(async (event) => {
   if (!industry) throw createError({ statusCode: 400, statusMessage: 'Please enter an industry name' })
   if (!mapping.success) throw createError({ statusCode: 400, statusMessage: 'The column mapping is invalid' })
 
-  const base = slugify(industry)
-  let slug = base
-  for (let n = 2; await blogExists(slug); n++) slug = `${base}-${n}`
-
-  const csv = file.data.toString('utf8')
   try {
+    const base = slugify(industry)
+    let slug = base
+    for (let n = 2; await blogExists(slug); n++) slug = `${base}-${n}`
+
+    const csv = file.data.toString('utf8')
     const blog = await buildBlogDocument({ csv, fileName: file.filename, industry, slug, mapping: mapping.data }, useRuntimeConfig(event))
     await saveBlog(blog)
     await useStorage('blogs').setItemRaw(`${slug}.csv`, csv)
     return { slug, url: `/blog/${slug}`, contentSource: blog.contentSource }
   }
   catch (error) {
-    throw createError({ statusCode: 400, statusMessage: error instanceof Error ? error.message : 'Could not build the blog' })
+    if (error instanceof CsvError) throw createError({ statusCode: 400, statusMessage: error.message })
+    console.error(error)
+    throw createError({ statusCode: 500, statusMessage: 'Could not create the blog. Try again in a minute.' })
   }
 })

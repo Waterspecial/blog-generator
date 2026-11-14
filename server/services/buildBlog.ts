@@ -8,6 +8,8 @@ import { BlogDocumentSchema, type BlogDocument } from '../../shared/schemas'
 import type { BuildBlogInput, LlmConfig } from '../types'
 import { generateCopy } from '../ai/llm'
 
+export class CsvError extends Error {}
+
 export function parseCsv(csv: string): { headers: string[], rows: RawRow[] } {
   const result = Papa.parse<RawRow>(csv, { header: true, skipEmptyLines: true })
   return { headers: result.meta.fields ?? [], rows: result.data }
@@ -28,10 +30,10 @@ export async function buildBlogDocument(input: BuildBlogInput, llm: LlmConfig): 
   const mapping = input.mapping ?? detectFields(headers, rawRows.slice(0, 5))
 
   const missing = missingRequiredFields(mapping)
-  if (missing.length > 0) throw new Error(`Missing required columns: ${missing.join(', ')}`)
+  if (missing.length > 0) throw new CsvError(`Missing required columns: ${missing.join(', ')}`)
 
   const rows = normaliseRows(rawRows, mapping)
-  if (rows.length === 0) throw new Error('No rows have both a name and an amount')
+  if (rows.length === 0) throw new CsvError('No rows have both a name and an amount')
 
   const stats = computeStats(rows)
   const amountLabel = invertMapping(mapping).amount!
