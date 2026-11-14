@@ -18,9 +18,9 @@ const rowCount = ref(0)
 const columns = ref({} as Record<StandardField, string>)
 const industry = ref('')
 const generating = ref(false)
-const error = ref('')
-const fallbackUrl = ref('')
 const uploadToken = ref('')
+const tokenInput = ref<HTMLInputElement | null>(null)
+const tokenInvalid = ref(false)
 
 const TOKEN_KEY = 'upload-token'
 onMounted(() => {
@@ -28,26 +28,50 @@ onMounted(() => {
   catch {}
 })
 watch(uploadToken, (value) => {
+  tokenInvalid.value = false
   try { localStorage.setItem(TOKEN_KEY, value) }
   catch {}
 })
 
 const canGenerate = computed(() => file.value && columns.value.name && columns.value.amount && industry.value.trim())
 
+const toast = useToast()
+
 function selectFile(selected: File | undefined) {
   if (!selected) return
-  error.value = ''
-  fallbackUrl.value = ''
+
+  if (!selected.name.toLowerCase().endsWith('.csv')) {
+    toast.error('Please choose a .csv file')
+    return
+  }
+  if (selected.size > MAX_UPLOAD_BYTES) {
+    toast.error(`This file is ${(selected.size / 1024 / 1024).toFixed(1)} MB. The limit is ${MAX_UPLOAD_BYTES / 1024 / 1024} MB.`)
+    return
+  }
+
   Papa.parse<RawRow>(selected, {
     header: true,
     skipEmptyLines: true,
-    complete: ({ data, meta }) => {
+    error: () => toast.error('This file could not be read. Check it is a valid CSV.'),
+    complete: ({ data, meta, errors }) => {
+      const fields = (meta.fields ?? []).filter(Boolean)
+      if (!fields.length) {
+        toast.error('This file has no header row')
+        return
+      }
+      if (!data.length) {
+        toast.error('This file has headers but no rows')
+        return
+      }
+      if (errors.length) toast.warning(`${errors.length} rows look malformed and may be skipped`)
+
       file.value = selected
-      headers.value = meta.fields ?? []
+      headers.value = fields
       rowCount.value = data.length
-      const detected = Object.fromEntries(Object.entries(detectFields(headers.value, data.slice(0, 5))).map(([header, field]) => [field, header]))
+      const detected = Object.fromEntries(Object.entries(detectFields(fields, data.slice(0, 5))).map(([header, field]) => [field, header]))
       columns.value = Object.fromEntries(STANDARD_FIELDS.map(field => [field, detected[field] ?? ''])) as Record<StandardField, string>
       industry.value = industryFromFileName(selected.name)
+      toast.success(`Loaded ${data.length} rows from ${selected.name}`)
     },
   })
 }
@@ -63,20 +87,40 @@ async function generate() {
   body.append('mapping', JSON.stringify(mapping))
 
   generating.value = true
-  error.value = ''
+  tokenInvalid.value = false
   try {
     const result = await $fetch<{ url: string, contentSource: string }>('/api/generate', {
       method: 'POST',
       body,
       headers: { 'x-upload-token': uploadToken.value },
     })
-    if (result.contentSource === 'fallback') fallbackUrl.value = result.url
-    else await navigateTo(result.url)
+    if (result.contentSource === 'fallback') {
+      toast.warning('The AI was unavailable, so template copy was used.', { link: { to: result.url, label: 'View the page' }, duration: 0 })
+    }
+    else {
+      toast.success('Blog page created')
+      await navigateTo(result.url)
+    }
   }
   catch (e) {
-    error.value = (e as { data?: { message?: string } }).data?.message ?? 'Something went wrong'
+    toast.error(errorMessage(e))
   }
-  generating.value = false
+  finally {
+    generating.value = false
+  }
+}
+
+function errorMessage(e: unknown): string {
+  const { statusCode, data } = e as { statusCode?: number, data?: { message?: string } }
+  if (statusCode === 401) {
+    tokenInvalid.value = true
+    nextTick(() => tokenInput.value?.focus())
+    return 'The upload token is wrong. Check it and try again.'
+  }
+  if (statusCode === 503) return 'Uploads are switched off on this site right now.'
+  if (statusCode === 400 && data?.message) return data.message
+  if (!statusCode) return 'Could not reach the server. Check your connection and try again.'
+  return 'Something went wrong on our side. Try again in a minute.'
 }
 </script>
 
@@ -96,7 +140,7 @@ async function generate() {
           <span class="font-semibold">Drop a CSV here or browse files</span>
           <span class="text-sm text-slate-600">One row per company. Up to {{ MAX_UPLOAD_BYTES / 1024 / 1024 }} MB.</span>
           <input type="file" accept=".csv" class="sr-only"
-            @change="selectFile(($event.target as HTMLInputElement).files?.[0])">
+            @change="selectFile(($event.target as HTMLInputElement).files?.[0]); ($event.target as HTMLInputElement).value = ''">
         </label>
         <div v-else class="flex items-center gap-3 rounded-2xl bg-brand-tint/50 p-4">
           <Icon name="lucide:file-text" class="size-5 text-brand" />
@@ -130,18 +174,16 @@ async function generate() {
           This takes about 30 seconds.</p>
         <label class="mb-5 flex flex-col gap-1 text-sm font-semibold">
           Upload token
-          <input v-model="uploadToken" type="password" autocomplete="current-password" class="input w-full bg-white font-normal sm:max-w-sm">
-          <span class="font-normal text-slate-600">Ask the site owner for this. It's remembered on this browser.</span>
+          <input ref="tokenInput" v-model="uploadToken" type="password" autocomplete="current-password"
+            class="input w-full bg-white font-normal sm:max-w-sm" :class="{ 'input-error': tokenInvalid }"
+            :aria-invalid="tokenInvalid">
+          <span v-if="tokenInvalid" class="font-normal text-error">That token didn't work.</span>
+          <span v-else class="font-normal text-slate-600">Ask the site owner for this. It's remembered on this browser.</span>
         </label>
         <button type="button" class="btn btn-primary btn-lg" :disabled="!canGenerate || generating" @click="generate">
           <span v-if="generating" class="loading loading-spinner" />
           {{ generating ? 'Generating copy with AI…' : 'Generate blog page' }}
         </button>
-        <div v-if="error" role="alert" class="alert alert-error mt-4">{{ error }}</div>
-        <div v-if="fallbackUrl" role="status" class="alert alert-warning mt-4">
-          The AI was unavailable, so template copy was used.
-          <NuxtLink :to="fallbackUrl" class="link font-semibold">View the page</NuxtLink>
-        </div>
       </section>
     </div>
   </main>
