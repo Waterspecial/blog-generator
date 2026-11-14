@@ -18,21 +18,6 @@ const rowCount = ref(0)
 const columns = ref({} as Record<StandardField, string>)
 const industry = ref('')
 const generating = ref(false)
-const uploadToken = ref('')
-const tokenInput = ref<HTMLInputElement | null>(null)
-const tokenInvalid = ref(false)
-
-const TOKEN_KEY = 'upload-token'
-onMounted(() => {
-  try { uploadToken.value = localStorage.getItem(TOKEN_KEY) ?? '' }
-  catch {}
-})
-watch(uploadToken, (value) => {
-  tokenInvalid.value = false
-  try { localStorage.setItem(TOKEN_KEY, value) }
-  catch {}
-})
-
 const canGenerate = computed(() => file.value && columns.value.name && columns.value.amount && industry.value.trim())
 
 const toast = useToast()
@@ -87,12 +72,10 @@ async function generate() {
   body.append('mapping', JSON.stringify(mapping))
 
   generating.value = true
-  tokenInvalid.value = false
   try {
     const result = await $fetch<{ url: string, contentSource: string }>('/api/generate', {
       method: 'POST',
       body,
-      headers: { 'x-upload-token': uploadToken.value },
     })
     if (result.contentSource === 'fallback') {
       toast.warning('The AI was unavailable, so template copy was used.', { link: { to: result.url, label: 'View the page' }, duration: 0 })
@@ -112,12 +95,6 @@ async function generate() {
 
 function errorMessage(e: unknown): string {
   const { statusCode, data } = e as { statusCode?: number, data?: { message?: string } }
-  if (statusCode === 401) {
-    tokenInvalid.value = true
-    nextTick(() => tokenInput.value?.focus())
-    return 'The upload token is wrong. Check it and try again.'
-  }
-  if (statusCode === 503) return 'Uploads are switched off on this site right now.'
   if (statusCode === 400 && data?.message) return data.message
   if (!statusCode) return 'Could not reach the server. Check your connection and try again.'
   return 'Something went wrong on our side. Try again in a minute.'
@@ -172,14 +149,6 @@ function errorMessage(e: unknown): string {
         <h2 id="gen" class="mb-1 text-xl font-extrabold">3. Generate</h2>
         <p class="mb-5 text-sm text-slate-600">Stats are calculated from the CSV first, then the AI writes the copy.
           This takes about 30 seconds.</p>
-        <label class="mb-5 flex flex-col gap-1 text-sm font-semibold">
-          Upload token
-          <input ref="tokenInput" v-model="uploadToken" type="password" autocomplete="current-password"
-            class="input w-full bg-white font-normal sm:max-w-sm" :class="{ 'input-error': tokenInvalid }"
-            :aria-invalid="tokenInvalid">
-          <span v-if="tokenInvalid" class="font-normal text-error">That token didn't work.</span>
-          <span v-else class="font-normal text-slate-600">Ask the site owner for this. It's remembered on this browser.</span>
-        </label>
         <button type="button" class="btn btn-primary btn-lg" :disabled="!canGenerate || generating" @click="generate">
           <span v-if="generating" class="loading loading-spinner" />
           {{ generating ? 'Generating copy with AI…' : 'Generate blog page' }}
