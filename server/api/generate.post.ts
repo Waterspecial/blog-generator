@@ -11,7 +11,6 @@ function parseJson(text: string): unknown {
 }
 
 export default defineEventHandler(async (event) => {
-  checkUploadToken(event)
   const form = await readMultipartFormData(event)
   const part = (name: string) => form?.find(item => item.name === name)
 
